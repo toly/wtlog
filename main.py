@@ -76,7 +76,10 @@ def add_projects():
 def path_log_file(date=None):
     if date is None:
         date = datetime.now()
-    return os.path.join(APP_DIR, date.strftime('%Y/%m/%d'))
+    log_directory =  os.path.join(APP_DIR, date.strftime('%Y/%m'))
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
+    return os.path.join(APP_DIR, date.strftime('%Y/%m/%d')) + '.log'
 
 
 def write_log():

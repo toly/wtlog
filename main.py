@@ -111,7 +111,7 @@ def main():
     if args.init:
         make_app_dirs()
         add_projects()
-        # update crontab
+        # todo: update crontab
         return
 
     if args.log:

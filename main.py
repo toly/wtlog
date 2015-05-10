@@ -21,15 +21,15 @@ CONFIG = os.path.join(APP_DIR, 'projects.conf')
 LOG_FORMAT = '{timestamp}\t{project_path}\t{branch}\n'
 
 
-def valid_date(s):
-    try:
-        return datetime.strptime(s, "%Y.%m.%d")
-    except ValueError:
-        msg = "Not a valid date: '{0}'.".format(s)
-        raise ArgumentTypeError(msg)
-
-
 def create_arg_parser():
+
+    def valid_date(s):
+        try:
+            return datetime.strptime(s, "%Y.%m.%d")
+        except ValueError:
+            msg = "Not a valid date: '{0}'.".format(s)
+            raise ArgumentTypeError(msg)
+
     parser = ArgumentParser(prog='wtlog')
     parser.add_argument('-i', '--init', action="store_true",
                         help="Init WTLog:\n 1. make dirs\n 2. find projects (.git/)\n 3. update crontab")

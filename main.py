@@ -74,54 +74,52 @@ def add_projects():
             f.write(project_path + '\n')
 
 
-def path_log_file(date=None):
-    if date is None:
-        date = datetime.now()
-    log_directory = os.path.join(APP_DIR, date.strftime('%Y/%m'))
-    if not os.path.exists(log_directory):
-        os.makedirs(log_directory)
-    return os.path.join(APP_DIR, date.strftime('%Y/%m/%d')) + '.log'
+class WorkTimeLog(object):
 
+    def __init__(self, date=None):
+        self.date = date or datetime.now()
 
-def write_log():
+    @property
+    def log_path_file(self):
+        log_directory = os.path.join(APP_DIR, self.date.strftime('%Y/%m'))
+        if not os.path.exists(log_directory):
+            os.makedirs(log_directory)
+        return os.path.join(APP_DIR, self.date.strftime('%Y/%m/%d')) + '.log'
 
-    results = {}
-    for project_path in get_projects():
-        get_branch_command = 'cd %s && git rev-parse --abbrev-ref HEAD' % project_path
-        status, branch = commands.getstatusoutput(get_branch_command)
-        if status == 0:
-            results[project_path] = branch
-
-    time_hash = str(time.time())
-    log_file = path_log_file()
-    with open(log_file, 'a+') as f:
+    def write_log(self):
+        results = {}
         for project_path in get_projects():
-            log_params = dict(
-                timestamp=time_hash,
-                project_path=project_path,
-                branch=results[project_path]
-            )
-            log_line = LOG_FORMAT.format(**log_params)
-            f.write(log_line)
+            get_branch_command = 'cd %s && git rev-parse --abbrev-ref HEAD' % project_path
+            status, branch = commands.getstatusoutput(get_branch_command)
+            if status == 0:
+                results[project_path] = branch
 
+        time_hash = str(time.time())
+        with open(self.log_path_file, 'a+') as f:
+            for project_path in get_projects():
+                log_params = dict(
+                    timestamp=time_hash,
+                    project_path=project_path,
+                    branch=results[project_path]
+                )
+                log_line = LOG_FORMAT.format(**log_params)
+                f.write(log_line)
 
-def read_log(date=None):
+    def read_log(self):
+        with open(self.log_path_file) as f:
+            log_lines = f.readlines()
+        log_lines = map(lambda x: x.strip(), log_lines)
 
-    log_file = path_log_file(date)
-    with open(log_file) as f:
-        log_lines = f.readlines()
-    log_lines = map(lambda x: x.strip(), log_lines)
+        projects_dict = defaultdict(dict)
+        for line in log_lines:
+            try:
+                timestamp, project_path, branch = line.split('\t')
+            except ValueError:
+                continue
+            timestamp = float(timestamp)
+            projects_dict[timestamp][project_path] = branch
 
-    projects_dict = defaultdict(dict)
-    for line in log_lines:
-        try:
-            timestamp, project_path, branch = line.split('\t')
-        except ValueError:
-            continue
-        timestamp = float(timestamp)
-        projects_dict[timestamp][project_path] = branch
-
-    return projects_dict
+        return projects_dict
 
 
 def main():
@@ -135,12 +133,13 @@ def main():
         return
 
     if args.log:
-        write_log()
+        wt_log = WorkTimeLog()
+        wt_log.write_log()
         return
 
     if args.report:
-        report_date = args.date or datetime.now()
-        log_data = read_log(report_date)
+        wt_log = WorkTimeLog(date=args.date)
+        log_data = wt_log.read_log()
         # make and print report
         return
 

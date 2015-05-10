@@ -10,6 +10,7 @@ __author__ = 'toly'
 import os
 import time
 import commands
+from collections import defaultdict
 from datetime import datetime
 from argparse import ArgumentParser, ArgumentTypeError
 
@@ -76,7 +77,7 @@ def add_projects():
 def path_log_file(date=None):
     if date is None:
         date = datetime.now()
-    log_directory =  os.path.join(APP_DIR, date.strftime('%Y/%m'))
+    log_directory = os.path.join(APP_DIR, date.strftime('%Y/%m'))
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
     return os.path.join(APP_DIR, date.strftime('%Y/%m/%d')) + '.log'
@@ -104,6 +105,25 @@ def write_log():
             f.write(log_line)
 
 
+def read_log(date=None):
+
+    log_file = path_log_file(date)
+    with open(log_file) as f:
+        log_lines = f.readlines()
+    log_lines = map(lambda x: x.strip(), log_lines)
+
+    projects_dict = defaultdict(dict)
+    for line in log_lines:
+        try:
+            timestamp, project_path, branch = line.split('\t')
+        except ValueError:
+            continue
+        timestamp = float(timestamp)
+        projects_dict[timestamp][project_path] = branch
+
+    return projects_dict
+
+
 def main():
     arg_parser = create_arg_parser()
     args = arg_parser.parse_args()
@@ -120,6 +140,7 @@ def main():
 
     if args.report:
         report_date = args.date or datetime.now()
+        log_data = read_log(report_date)
         # make and print report
         return
 

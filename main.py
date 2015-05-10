@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 __author__ = 'toly'
+"""
+    Format log file:
+        timestamp1  project_path1   branch1
+        timestamp1  project_path2   branch2
+        timestamp2  project_path1   branch3
+"""
 
 import os
+import time
 import commands
 from datetime import datetime
 from argparse import ArgumentParser, ArgumentTypeError
@@ -10,6 +17,7 @@ from argparse import ArgumentParser, ArgumentTypeError
 HOME_DIR = os.path.expanduser('~')
 APP_DIR = os.path.join(HOME_DIR, '.wtlog')
 CONFIG = os.path.join(APP_DIR, 'projects.conf')
+LOG_FORMAT = '{timestamp}\t{project_path}\t{branch}\n'
 
 
 def valid_date(s):
@@ -36,6 +44,7 @@ def get_projects():
     with open(CONFIG) as f:
         lines = f.readlines()
     lines = map(lambda x: x.strip(), lines)
+    lines.sort()
     lines = filter(None, lines)
     return lines
 
@@ -64,6 +73,34 @@ def add_projects():
             f.write(project_path + '\n')
 
 
+def path_log_file(date=None):
+    if date is None:
+        date = datetime.now()
+    return os.path.join(APP_DIR, date.strftime('%Y/%m/%d'))
+
+
+def write_log():
+
+    results = {}
+    for project_path in get_projects():
+        get_branch_command = 'cd %s && git rev-parse --abbrev-ref HEAD' % project_path
+        status, branch = commands.getstatusoutput(get_branch_command)
+        if status == 0:
+            results[project_path] = branch
+
+    time_hash = str(time.time())
+    log_file = path_log_file()
+    with open(log_file, 'a+') as f:
+        for project_path in get_projects():
+            log_params = dict(
+                timestamp=time_hash,
+                project_path=project_path,
+                branch=results[project_path]
+            )
+            log_line = LOG_FORMAT.format(**log_params)
+            f.write(log_line)
+
+
 def main():
     arg_parser = create_arg_parser()
     args = arg_parser.parse_args()
@@ -75,7 +112,7 @@ def main():
         return
 
     if args.log:
-        # write log
+        write_log()
         return
 
     if args.report:

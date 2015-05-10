@@ -106,6 +106,15 @@ class WorkTimeLog(object):
                 f.write(log_line)
 
     def read_log(self):
+        """
+            return log in format
+                {
+                    timestamp1: {
+                        project_path1: branch_a,
+                        project_path2: branch_b,
+                    }, ...
+                }
+        """
         with open(self.log_path_file) as f:
             log_lines = f.readlines()
         log_lines = map(lambda x: x.strip(), log_lines)

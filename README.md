@@ -18,7 +18,7 @@ Init
 	
 Add to crontab (before run ```crontab -e```) line:
 
-	* * * * * wtlog.py -l
+	* * * * * PATH=$PATH:/usr/local/bin/ wtlog.py -l
 
 ## Usage
 

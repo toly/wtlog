@@ -73,6 +73,14 @@ def add_projects():
         for project_path in projects:
             f.write(project_path + '\n')
 
+def time_display(minutes):
+    h, m = divmod(minutes, 60)
+    params = dict(h=h, m=m)
+    template = '     {m:2d}m'
+    if h:
+        template = '{h:3d}h {m:2d}m'
+    return template.format(**params)
+
 
 class WorkTimeLog(object):
 
@@ -173,7 +181,9 @@ def main():
             branches_times[current_branch] += 1
 
         for branch, branch_time in branches_times.iteritems():
-            print branch, branch_time
+            if branch is None:
+                continue
+            print branch, '\t', time_display(branch_time)
 
         return
 

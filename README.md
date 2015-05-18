@@ -16,7 +16,7 @@ Init
 
 	wtlog.py -i
 	
-Add to crontab line:
+Add to crontab (before run ```crontab -e```) line:
 
 	* * * * * wtlog.py -l
 

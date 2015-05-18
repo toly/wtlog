@@ -149,7 +149,7 @@ def main():
     if args.report:
         wt_log = WorkTimeLog(date=args.date)
         log_data = wt_log.read_log()
-        
+
         # make and print report
         current_branch = None
         branches_set = set()
@@ -169,8 +169,8 @@ def main():
                 else:
                     current_branch = None
 
-            if current_branch:
-                branches_times[current_branch] += 1
+            # if current_branch:
+            branches_times[current_branch] += 1
 
         for branch, branch_time in branches_times.iteritems():
             print branch, branch_time

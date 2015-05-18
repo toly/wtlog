@@ -10,7 +10,7 @@ Install
 
 	git clone https://github.com/toly/wtlog.git
 	cd wtlog
-	sudo python.py install
+	sudo python setup.py install
 	
 Init
 

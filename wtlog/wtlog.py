@@ -152,20 +152,20 @@ def main():
 
         # make and print report
         current_branch = None
-        branches_set = set()
+        current_branches = None
         branches_times = defaultdict(int)
         for time_point, projects_status in sorted(log_data.iteritems(), key=lambda x: x[0]):
-            branches = set(projects_status.values())
-            if not branches_set:
+            new_branches = set(projects_status.values()) - {'master'}
+            if current_branches is None:
                 # init current branches set
-                branches_set = branches
+                current_branches = new_branches
                 continue
 
-            delta_branches = branches - branches_set
-            if delta_branches:
-                branches_set = branches
-                if delta_branches - {'master'}:
-                    current_branch = (delta_branches - {'master'}).pop()
+            if current_branches != new_branches:
+                delta_branches = new_branches - current_branches
+                current_branches = new_branches
+                if delta_branches:
+                    current_branch = delta_branches.pop()
                 else:
                     current_branch = None
 

@@ -123,6 +123,8 @@ class WorkTimeLog(object):
                     }, ...
                 }
         """
+        if not os.path.exists(self.log_path_file):
+            return dict()
         with open(self.log_path_file) as f:
             log_lines = f.readlines()
         log_lines = map(lambda x: x.strip(), log_lines)
